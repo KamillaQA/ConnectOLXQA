@@ -80,5 +80,6 @@ jobs:
           password: ${{ secrets.MAIL_PASSWORD }}
           subject: ${{ steps.newman.outcome == 'failure' && '🔴 Falhas nos testes de API - OLX' || '🧪 Teste de envio de e-mail - OLX' }}
           to: ${{ secrets.MAIL_TO }}
-          from: "QA Bot OLX <alertas.lightplus@gmail.com>"
+          from: "QA Bot OLX <${{ secrets.MAIL_USERNAME }}>"
+          body: file://reports/email-body.txt
           html_body: file://reports/email-body.html

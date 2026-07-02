@@ -144,6 +144,36 @@ const html = `<!DOCTYPE html>
 
 fs.writeFileSync(path.join(reportsDir, 'email-body.html'), html);
 
+// Versão em texto puro, usada como parte alternativa do e-mail (multipart).
+// Ter um corpo de texto ao lado do HTML reduz a chance do e-mail cair em spam
+// e é o que aparece quando o cliente de e-mail não renderiza HTML.
+const plainFailures = failures.length
+  ? failures.map((f) => `- ${f.source?.name || 'Sem nome'} | ${f.error?.test || '-'} | ${f.error?.message || '-'}`).join('\n')
+  : 'Nenhum detalhe disponível.';
+
+const plainText = [
+  theme.title,
+  '',
+  isForcedTest
+    ? `Este é um envio manual de teste solicitado no GitHub Actions para ${collectionName}. Nenhuma falha real foi detectada nesta execução.`
+    : `A execução programada de ${collectionName} encontrou falhas.`,
+  `Executado em ${stats.timestamp}`,
+  '',
+  `Taxa de sucesso: ${successRate}%`,
+  `Assertions falhas: ${stats.assertionsFailed}`,
+  `Requests testadas: ${stats.requestsTotal}`,
+  '',
+  'Detalhe das falhas:',
+  plainFailures,
+  '',
+  `Dashboard completo: ${pagesUrl}`,
+  `Logs da execução: ${runUrl}`,
+  '',
+  'Enviado automaticamente pela pipeline de testes de API - OLX QA'
+].join('\n');
+
+fs.writeFileSync(path.join(reportsDir, 'email-body.txt'), plainText);
+
 function escapeHtml(value) {
   return String(value)
     .replace(/&/g, '&amp;')
